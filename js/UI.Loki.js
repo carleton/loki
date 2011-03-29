@@ -158,7 +158,8 @@ UI.Loki = function Loki()
 	 */
 	this.textarea_to_iframe = function()
 	{
-		self.set_html(_textarea.value);
+		// this line crashes IE9 and i am not convinced it is needed since it gets called in _init_async()
+		// self.set_html(_textarea.value);
 		_root.replaceChild(_iframe_wrapper, _textarea);
 		_root.appendChild(_hidden);
 		_init_async();
@@ -1177,28 +1178,32 @@ UI.Loki = function Loki()
 		function submit_handler(ev)
 		{
 			try {
-				self.copy_iframe_to_hidden();
-			} catch (ex) {
-				Util.Event.prevent_default(ev);
-				var sent = self.crashed(ex);
-				alert("An error occurred that prevented your document from " +
-					"being safely submitted." +
-					(sent ? " A report of this error has been sent." : "") +
-					"\n\nTechnical details:\n" +
-					self.describe_error(ex));
-				
-				if (typeof(console) == 'object' && 'error' in console) {
-					console.error('Failed to generate HTML:',
-						ex);
-				}
-				
-				throw ex;
-				return false;
+				self.copy_iframe_to_hidden(); // IE9 will fail here if currently in source view
 			}
-			
-			return true;
-		}
-		
+			catch (e) {
+				try {
+					if (_is_textarea_active()) self.textarea_to_iframe();
+					self.copy_iframe_to_hidden();
+				}
+				catch (f)
+				{
+					Util.Event.prevent_default(ev);
+					var sent = self.crashed(e);
+					alert("An error occurred that prevented your document from " + "being safely submitted." +
+                    (sent ? " A report of this error has been sent." : "") +
+                    "\n\nTechnical details:\n" +
+                    self.describe_error(e));
+                    
+                    if (typeof(console) == 'object' && 'error' in console)
+                    {
+                    	console.error('Failed to generate HTML:', e);
+                    }
+                    throw e;
+                }
+                return false;
+            }
+            return true;
+        }
 		
 		// this copies the changes made in the iframe back to the hidden form element
 		Util.Event.add_event_listener(_hidden.form, 'submit',
