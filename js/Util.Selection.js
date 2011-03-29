@@ -48,12 +48,20 @@ Util.Selection.paste_node = function paste_node_at_selection(sel, new_node)
 	rng = Util.Range.create_range(sel);
 	Util.Range.insert_node(rng, new_node);
 
-	// IE
 	if ( Util.Browser.IE )
 	{
-		rng.collapse(false);
-		rng.select();
+		// We only want to do this pre IE 9 so we add this hack.
+		if (parseInt(Util.Browser.get_version()) < 9)
+		{
+			rng.collapse(false);
+			rng.select();
+		}
+		else
+		{
+			Util.Selection.collapse(sel, false);
+		}
 	}
+	else
 	// In Gecko, move selection after node
 	{
 		// Select all first, to avoid the annoying Gecko
