@@ -165,10 +165,10 @@ UI.Link_Helper = function()
 						tag.removeAttribute(name);
 				}
 				
-				set_attribute('href', uri);
 				set_attribute('target', (new_window) ? '_blank' : null);
 				set_attribute('title', title);
 				set_attribute('loki:onclick', onclick);
+				set_attribute('href', uri);
 			});
 			
 			// Collapse selection to end so people can see the link and
